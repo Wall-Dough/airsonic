@@ -46,6 +46,7 @@ public class RandomSearchCriteria {
     private final boolean showStarredSongs;
     private final boolean showUnstarredSongs;
     private final String format;
+    private final boolean random;
 
     /**
      * Creates a new instance.
@@ -59,7 +60,7 @@ public class RandomSearchCriteria {
     public RandomSearchCriteria(int count, String genre, Integer fromYear, Integer toYear, List<MusicFolder> musicFolders) {
         this(
             count, genre, fromYear, toYear, musicFolders,
-            null, null, null, null, null, null, true, true, null
+            null, null, null, null, null, null, true, true, null, true
         );
     }
 
@@ -95,7 +96,8 @@ public class RandomSearchCriteria {
             Integer maxPlayCount,
             boolean showStarredSongs,
             boolean showUnstarredSongs,
-            String format
+            String format,
+            boolean random
     ) {
 
         this.count = count;
@@ -112,6 +114,7 @@ public class RandomSearchCriteria {
         this.showStarredSongs = showStarredSongs;
         this.showUnstarredSongs = showUnstarredSongs;
         this.format = format;
+        this.random = random;
     }
 
     public int getCount() {
@@ -168,5 +171,9 @@ public class RandomSearchCriteria {
 
     public Integer getMaxPlayCount() {
         return maxPlayCount;
+    }
+
+    public boolean isRandom() {
+        return random;
     }
 }

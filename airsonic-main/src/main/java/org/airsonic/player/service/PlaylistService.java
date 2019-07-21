@@ -24,10 +24,7 @@ import chameleon.playlist.SpecificPlaylistFactory;
 import chameleon.playlist.SpecificPlaylistProvider;
 import org.airsonic.player.dao.MediaFileDao;
 import org.airsonic.player.dao.PlaylistDao;
-import org.airsonic.player.domain.MediaFile;
-import org.airsonic.player.domain.PlayQueue;
-import org.airsonic.player.domain.Playlist;
-import org.airsonic.player.domain.User;
+import org.airsonic.player.domain.*;
 import org.airsonic.player.service.playlist.PlaylistExportHandler;
 import org.airsonic.player.service.playlist.PlaylistImportHandler;
 import org.airsonic.player.util.Pair;
@@ -91,11 +88,33 @@ public class PlaylistService {
         this.importHandlers = importHandlers;
     }
 
+    private void createStarredPlaylist(String username, String folder) {
+        final String playlistName = "Starred" + ((folder == null) ? "" : (" " + folder));
+        Playlist playlist = playlistDao.getPlaylistByName(playlistName);
+        if (playlist != null) {
+            return;
+        }
+        // TODO: Retrieve songs for song count and time
+        final Date now = new Date();
+        playlist = new Playlist(0, username, false, playlistName, playlistName, 0, 0, now, now, null);
+        createPlaylist(playlist);
+    }
+
+    private void createStarredPlaylists(String username) {
+        createStarredPlaylist(username, null);
+        final List<MusicFolder> folders = settingsService.getAllMusicFolders();
+        for (final MusicFolder folder : folders) {
+            createStarredPlaylist(username, folder.getName());
+        }
+    }
+
     public List<Playlist> getAllPlaylists() {
+        createStarredPlaylists("admin");
         return sort(playlistDao.getAllPlaylists());
     }
 
     public List<Playlist> getReadablePlaylistsForUser(String username) {
+        createStarredPlaylists(username);
         return sort(playlistDao.getReadablePlaylistsForUser(username));
     }
 
@@ -127,7 +146,44 @@ public class PlaylistService {
     }
 
     public List<MediaFile> getFilesInPlaylist(int id, boolean includeNotPresent) {
-        List<MediaFile> files = mediaFileDao.getFilesInPlaylist(id);
+        final String username = "admin";
+        final Playlist playlist = getPlaylist(id);
+        List<MediaFile> files;
+        final String playlistName = playlist == null ? "" : playlist.getName();
+        if (playlistName.startsWith("Starred")) {
+            final List<MusicFolder> musicFolders;
+            if (playlistName.startsWith("Starred ")) {
+                musicFolders = new ArrayList<>();
+                final String folderName = playlistName.substring("Starred ".length());
+                final MusicFolder folder = settingsService.getMusicFolderByName(folderName);
+                if (folder != null) {
+                    musicFolders.add(folder);
+                }
+            } else {
+                musicFolders = settingsService.getAllMusicFolders();
+            }
+            RandomSearchCriteria criteria = new RandomSearchCriteria(
+                    -1,
+                    null,
+                    null,
+                    null,
+                    musicFolders,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    false,
+                    null,
+                    false
+            );
+            files = mediaFileDao.getRandomSongs(criteria, username);
+        } else {
+            files = mediaFileDao.getFilesInPlaylist(id);
+        }
+
         if (includeNotPresent) {
             return files;
         }

@@ -226,7 +226,8 @@ public class RandomPlayQueueController {
                 maxPlayCount,
                 doesShowStarredSongs,
                 doesShowUnstarredSongs,
-                format
+                format,
+                true
         );
         User user = securityService.getCurrentUser(request);
         Player player = playerService.getPlayer(request, response);

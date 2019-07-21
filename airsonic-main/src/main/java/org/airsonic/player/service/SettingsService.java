@@ -1008,6 +1008,25 @@ public class SettingsService {
     }
 
     /**
+     * Returns the music folder with the given name.
+     *
+     * @param name The name.
+     * @return The music folder with the given name, or <code>null</code> if not found.
+     */
+    public MusicFolder getMusicFolderByName(String name) {
+        if (name == null) {
+            return null;
+        }
+        List<MusicFolder> all = getAllMusicFolders();
+        for (MusicFolder folder : all) {
+            if (name.equals(folder.getName())) {
+                return folder;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Creates a new music folder.
      *
      * @param musicFolder The music folder to create.

@@ -127,6 +127,10 @@ public class PlaylistDao extends AbstractDao {
                 new Date(), playlist.getImportedFrom(), playlist.getId());
     }
 
+    public Playlist getPlaylistByName(String name) {
+        return queryOne("select " + QUERY_COLUMNS + " from playlist where name=?", rowMapper, name);
+    }
+
     private static class PlaylistMapper implements RowMapper<Playlist> {
         public Playlist mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Playlist(

@@ -521,6 +521,7 @@ public class MediaFileDao extends AbstractDao {
             put("starred", criteria.isShowStarredSongs());
             put("unstarred", criteria.isShowUnstarredSongs());
             put("format", criteria.getFormat());
+            put("random", criteria.isRandom());
         }};
 
         boolean joinAlbumRating = (criteria.getMinAlbumRating() != null || criteria.getMaxAlbumRating() != null);
@@ -603,7 +604,9 @@ public class MediaFileDao extends AbstractDao {
             query += " and starred_media_file.id is null";
         }
 
-        query += " order by rand()";
+        if (criteria.isRandom()) {
+            query += " order by rand()";
+        }
 
         return namedQueryWithLimit(query, rowMapper, args, criteria.getCount());
     }
